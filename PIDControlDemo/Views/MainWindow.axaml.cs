@@ -32,6 +32,13 @@ public partial class MainWindow : Window
             X = Position.X,
             Y = Position.Y
         };
+
+        // ViewModelのパラメータも保存
+        if (DataContext is MainWindowViewModel vm)
+        {
+            settings = vm.SaveSettings(settings);
+        }
+
         WindowSettingsService.Save(settings);
     }
 
@@ -41,6 +48,10 @@ public partial class MainWindow : Window
 
         var vm = DataContext as MainWindowViewModel;
         if (vm == null) return;
+
+        // 制御パラメータの復元
+        var settings = WindowSettingsService.Load();
+        vm.LoadSettings(settings);
 
         var upBtn = this.FindControl<Button>("ManualUpButton");
         var downBtn = this.FindControl<Button>("ManualDownButton");

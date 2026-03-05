@@ -35,180 +35,190 @@
                                        GraphVersion="{Binding GraphVersion}"
                                        Margin="0,12,0,0"/>
 
-        <!-- メインコンテンツ -->
-        <ScrollViewer>
-            <StackPanel Spacing="12">
+        <!-- メインコンテンツ 2カラム -->
+        <Grid ColumnDefinitions="*,12,*">
 
-                <!-- 目標回転数 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="目標回転数" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Width="80" TextAlignment="Right"
-                                       Text="{Binding TargetRpm, StringFormat='{}{0:F0} rpm'}"
-                                       VerticalAlignment="Center"/>
-                            <Slider Minimum="0" Maximum="3000" Value="{Binding TargetRpm}"
-                                    TickFrequency="100" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                    </StackPanel>
-                </Border>
+            <!-- 左列: 状態表示 + 手動操作 -->
+            <ScrollViewer Grid.Column="0">
+                <StackPanel Spacing="8">
 
-                <!-- 検知回転数 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="検知回転数" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Width="80" TextAlignment="Right"
-                                       Text="{Binding SensedRpm, StringFormat='{}{0:F0} rpm'}"
-                                       VerticalAlignment="Center"/>
-                            <ProgressBar Minimum="0" Maximum="3000" Value="{Binding SensedRpm}"
-                                         Height="20" Foreground="Red"/>
-                        </DockPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- アクセル開度 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="アクセル開度" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Width="80" TextAlignment="Right"
-                                       Text="{Binding CurrentThrottle, StringFormat='{}{0:F1} %'}"
-                                       VerticalAlignment="Center"/>
-                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding CurrentThrottle}"
-                                         Height="20" Foreground="LimeGreen"/>
-                        </DockPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- ボタン状態 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="ボタン状態" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Padding="16,8" CornerRadius="4"
-                                    Background="{Binding IsUpPressed, Converter={StaticResource UpBrushConverter}}">
-                                <TextBlock Text="▲ UP" FontWeight="Bold"/>
-                            </Border>
-                            <Border Padding="16,8" CornerRadius="4"
-                                    Background="{Binding IsDownPressed, Converter={StaticResource DownBrushConverter}}">
-                                <TextBlock Text="▼ DOWN" FontWeight="Bold"/>
-                            </Border>
+                    <!-- 目標回転数 -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="目標回転数" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,2"/>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Width="70" TextAlignment="Right"
+                                           Text="{Binding TargetRpm, StringFormat='{}{0:F0} rpm'}"
+                                           VerticalAlignment="Center" FontSize="12"/>
+                                <Slider Minimum="0" Maximum="3000" Value="{Binding TargetRpm}"
+                                        TickFrequency="100" IsSnapToTickEnabled="True"/>
+                            </DockPanel>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
+                    </Border>
 
-                <!-- PID制御 ON/OFF + ゲイン調整 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel Spacing="8">
-                        <DockPanel>
-                            <TextBlock Text="PID制御" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsPidEnabled}"
-                                          HorizontalAlignment="Right" OnContent="ON" OffContent="OFF"/>
-                        </DockPanel>
+                    <!-- 検知回転数 -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="検知回転数" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,2"/>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Width="70" TextAlignment="Right"
+                                           Text="{Binding SensedRpm, StringFormat='{}{0:F0} rpm'}"
+                                           VerticalAlignment="Center" FontSize="12"/>
+                                <ProgressBar Minimum="0" Maximum="3000" Value="{Binding SensedRpm}"
+                                             Height="18" Foreground="Red"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
 
-                        <!-- スミス予測器 -->
-                        <Border Background="#1E1E1E" CornerRadius="4" Padding="8" Margin="0,4,0,0">
-                            <StackPanel Spacing="2">
-                                <DockPanel>
-                                    <TextBlock Text="スミス予測器" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsSmithEnabled}"
-                                                  HorizontalAlignment="Right" OnContent="ON" OffContent="OFF"/>
-                                </DockPanel>
-                                <TextBlock Text="内部モデルでむだ時間(2秒)を補償し、PIDが遅延なしで制御しているように振る舞う"
-                                           FontSize="10" Foreground="#888888" Margin="0,0,0,0"
-                                           TextWrapping="Wrap"/>
+                    <!-- アクセル開度 -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="アクセル開度" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,2"/>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Width="70" TextAlignment="Right"
+                                           Text="{Binding CurrentThrottle, StringFormat='{}{0:F1} %'}"
+                                           VerticalAlignment="Center" FontSize="12"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding CurrentThrottle}"
+                                             Height="18" Foreground="LimeGreen"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ボタン状態 + 手動操作 -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="ボタン状態" FontWeight="SemiBold" FontSize="12"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Padding="12,6" CornerRadius="4"
+                                        Background="{Binding IsUpPressed, Converter={StaticResource UpBrushConverter}}">
+                                    <TextBlock Text="▲ UP" FontWeight="Bold" FontSize="12"/>
+                                </Border>
+                                <Border Padding="12,6" CornerRadius="4"
+                                        Background="{Binding IsDownPressed, Converter={StaticResource DownBrushConverter}}">
+                                    <TextBlock Text="▼ DOWN" FontWeight="Bold" FontSize="12"/>
+                                </Border>
                             </StackPanel>
-                        </Border>
 
-                        <!-- オートチューン -->
-                        <Border Background="#1E1E1E" CornerRadius="4" Padding="8" Margin="0,4,0,0">
-                            <StackPanel Spacing="4">
-                                <DockPanel>
-                                    <TextBlock Text="オートチューン" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <Button DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                            Command="{Binding StartAutoTuneCommand}"
-                                            Foreground="White" Padding="12,6">
-                                        <Button.Content>
-                                            <Panel>
-                                                <TextBlock Text="開始" IsVisible="{Binding !IsAutoTuning}"/>
-                                                <TextBlock Text="中止" IsVisible="{Binding IsAutoTuning}"/>
-                                            </Panel>
-                                        </Button.Content>
-                                    </Button>
-                                </DockPanel>
-                                <ProgressBar Minimum="0" Maximum="1" Value="{Binding AutoTuneProgress}"
-                                             Height="6" Foreground="#FF9800"
-                                             IsVisible="{Binding IsAutoTuning}"/>
-                                <TextBlock Text="{Binding AutoTuneStatus}"
-                                           FontSize="10" Foreground="#CCCCCC"
-                                           TextWrapping="Wrap"/>
-                                <TextBlock Text="リレーフィードバック法で発振を計測し、最適なPIDゲインを自動算出します"
-                                           FontSize="10" Foreground="#666666"
-                                           IsVisible="{Binding !IsAutoTuning}"/>
+                            <TextBlock Text="手動操作" FontWeight="SemiBold" FontSize="12" Margin="0,4,0,0"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="▲ UP" Width="90" Height="36"
+                                        Foreground="White" FontSize="12"
+                                        x:Name="ManualUpButton"/>
+                                <Button Content="▼ DOWN" Width="90" Height="36"
+                                        Foreground="White" FontSize="12"
+                                        x:Name="ManualDownButton"/>
                             </StackPanel>
-                        </Border>
+                        </StackPanel>
+                    </Border>
 
-                        <TextBlock Text="PIDゲイン調整" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
 
-                        <!-- Kp -->
-                        <StackPanel Spacing="2">
+            <!-- 右列: PID制御設定 -->
+            <ScrollViewer Grid.Column="2">
+                <StackPanel Spacing="8">
+
+                    <!-- PID制御 ON/OFF -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel Spacing="6">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Left" Text="Kp:" Width="30" VerticalAlignment="Center"/>
-                                <TextBlock DockPanel.Dock="Right" Width="50" TextAlignment="Right"
-                                           Text="{Binding Kp, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
-                                <Slider Minimum="0" Maximum="5" Value="{Binding Kp}"
-                                        TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="PID制御" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                                <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsPidEnabled}"
+                                              HorizontalAlignment="Right" OnContent="ON" OffContent="OFF"/>
                             </DockPanel>
-                            <TextBlock Text="比例: 大きくすると応答が速くなるが、大きすぎると発振する"
-                                       FontSize="10" Foreground="#888888" Margin="30,0,0,0"/>
-                        </StackPanel>
 
-                        <!-- Ki -->
-                        <StackPanel Spacing="2">
-                            <DockPanel>
-                                <TextBlock DockPanel.Dock="Left" Text="Ki:" Width="30" VerticalAlignment="Center"/>
-                                <TextBlock DockPanel.Dock="Right" Width="50" TextAlignment="Right"
-                                           Text="{Binding Ki, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
-                                <Slider Minimum="0" Maximum="2" Value="{Binding Ki}"
-                                        TickFrequency="0.01" IsSnapToTickEnabled="True"/>
-                            </DockPanel>
-                            <TextBlock Text="積分: 定常偏差を解消する。大きすぎるとオーバーシュートが増える"
-                                       FontSize="10" Foreground="#888888" Margin="30,0,0,0"/>
-                        </StackPanel>
+                            <!-- スミス予測器 -->
+                            <Border Background="#1E1E1E" CornerRadius="4" Padding="6">
+                                <StackPanel Spacing="2">
+                                    <DockPanel>
+                                        <TextBlock Text="スミス予測器" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsSmithEnabled}"
+                                                      HorizontalAlignment="Right" OnContent="ON" OffContent="OFF"/>
+                                    </DockPanel>
+                                    <TextBlock Text="内部モデルでむだ時間(2秒)を補償"
+                                               FontSize="10" Foreground="#888888" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
 
-                        <!-- Kd -->
-                        <StackPanel Spacing="2">
-                            <DockPanel>
-                                <TextBlock DockPanel.Dock="Left" Text="Kd:" Width="30" VerticalAlignment="Center"/>
-                                <TextBlock DockPanel.Dock="Right" Width="50" TextAlignment="Right"
-                                           Text="{Binding Kd, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
-                                <Slider Minimum="0" Maximum="2" Value="{Binding Kd}"
-                                        TickFrequency="0.01" IsSnapToTickEnabled="True"/>
-                            </DockPanel>
-                            <TextBlock Text="微分: 変化を抑制しオーバーシュートを減らす。ノイズに敏感になりやすい"
-                                       FontSize="10" Foreground="#888888" Margin="30,0,0,0"/>
+                            <!-- オートチューン -->
+                            <Border Background="#1E1E1E" CornerRadius="4" Padding="6">
+                                <StackPanel Spacing="3">
+                                    <DockPanel>
+                                        <TextBlock Text="オートチューン" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                        <Button DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                                Command="{Binding StartAutoTuneCommand}"
+                                                Foreground="White" Padding="10,4" FontSize="11">
+                                            <Button.Content>
+                                                <Panel>
+                                                    <TextBlock Text="開始" IsVisible="{Binding !IsAutoTuning}"/>
+                                                    <TextBlock Text="中止" IsVisible="{Binding IsAutoTuning}"/>
+                                                </Panel>
+                                            </Button.Content>
+                                        </Button>
+                                    </DockPanel>
+                                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding AutoTuneProgress}"
+                                                 Height="4" Foreground="#FF9800"
+                                                 IsVisible="{Binding IsAutoTuning}"/>
+                                    <TextBlock Text="{Binding AutoTuneStatus}"
+                                               FontSize="10" Foreground="#CCCCCC" TextWrapping="Wrap"/>
+                                    <TextBlock Text="リレーフィードバック法でPIDゲインを自動算出"
+                                               FontSize="10" Foreground="#666666"
+                                               IsVisible="{Binding !IsAutoTuning}"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
+                    </Border>
 
-                <!-- 手動操作 -->
-                <Border Background="#2D2D2D" CornerRadius="6" Padding="12">
-                    <StackPanel>
-                        <TextBlock Text="手動操作" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Content="▲ UP" Width="100" Height="40"
-                                    Foreground="White"
-                                    x:Name="ManualUpButton"/>
-                            <Button Content="▼ DOWN" Width="100" Height="40"
-                                    Foreground="White"
-                                    x:Name="ManualDownButton"/>
+                    <!-- PIDゲイン調整 -->
+                    <Border Background="#2D2D2D" CornerRadius="6" Padding="10">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="PIDゲイン調整" FontWeight="SemiBold" FontSize="12"/>
+
+                            <!-- Kp -->
+                            <StackPanel Spacing="1">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="Kp:" Width="28" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock DockPanel.Dock="Right" Width="40" TextAlignment="Right" FontSize="12"
+                                               Text="{Binding Kp, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
+                                    <Slider Minimum="0" Maximum="5" Value="{Binding Kp}"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                </DockPanel>
+                                <TextBlock Text="比例: 応答速度。大きすぎると発振"
+                                           FontSize="9" Foreground="#888888" Margin="28,0,0,0"/>
+                            </StackPanel>
+
+                            <!-- Ki -->
+                            <StackPanel Spacing="1">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="Ki:" Width="28" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock DockPanel.Dock="Right" Width="40" TextAlignment="Right" FontSize="12"
+                                               Text="{Binding Ki, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
+                                    <Slider Minimum="0" Maximum="2" Value="{Binding Ki}"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                </DockPanel>
+                                <TextBlock Text="積分: 定常偏差を解消。大きすぎるとオーバーシュート"
+                                           FontSize="9" Foreground="#888888" Margin="28,0,0,0"/>
+                            </StackPanel>
+
+                            <!-- Kd -->
+                            <StackPanel Spacing="1">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="Kd:" Width="28" FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock DockPanel.Dock="Right" Width="40" TextAlignment="Right" FontSize="12"
+                                               Text="{Binding Kd, StringFormat='{}{0:F2}'}" VerticalAlignment="Center"/>
+                                    <Slider Minimum="0" Maximum="2" Value="{Binding Kd}"
+                                            TickFrequency="0.01" IsSnapToTickEnabled="True"/>
+                                </DockPanel>
+                                <TextBlock Text="微分: オーバーシュート抑制。ノイズに敏感"
+                                           FontSize="9" Foreground="#888888" Margin="28,0,0,0"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
+                    </Border>
 
-            </StackPanel>
-        </ScrollViewer>
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid>
 
     </DockPanel>
 </Window>

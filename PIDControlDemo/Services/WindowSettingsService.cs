@@ -10,6 +10,14 @@ public record WindowSettings
     public double Height { get; init; } = 700;
     public int X { get; init; } = -1;
     public int Y { get; init; } = -1;
+
+    // 制御パラメータ
+    public double TargetRpm { get; init; } = 1500;
+    public bool IsPidEnabled { get; init; } = true;
+    public bool IsSmithEnabled { get; init; } = true;
+    public double Kp { get; init; } = 0.15;
+    public double Ki { get; init; } = 0.03;
+    public double Kd { get; init; } = 0.8;
 }
 
 public static class WindowSettingsService

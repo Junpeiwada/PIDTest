@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Avalonia.Threading;
 using PIDControlDemo.Models;
+using PIDControlDemo.Services;
 
 namespace PIDControlDemo.ViewModels;
 
@@ -118,6 +119,29 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _smith.Reset();
         _pid.Reset();
+    }
+
+    public void LoadSettings(WindowSettings settings)
+    {
+        TargetRpm = settings.TargetRpm;
+        IsPidEnabled = settings.IsPidEnabled;
+        IsSmithEnabled = settings.IsSmithEnabled;
+        Kp = settings.Kp;
+        Ki = settings.Ki;
+        Kd = settings.Kd;
+    }
+
+    public WindowSettings SaveSettings(WindowSettings settings)
+    {
+        return settings with
+        {
+            TargetRpm = TargetRpm,
+            IsPidEnabled = IsPidEnabled,
+            IsSmithEnabled = IsSmithEnabled,
+            Kp = Kp,
+            Ki = Ki,
+            Kd = Kd
+        };
     }
 
     // 手動ボタン操作
