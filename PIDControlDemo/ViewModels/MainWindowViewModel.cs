@@ -13,6 +13,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly EngineSimulator _engine = new();
     private readonly PidController _pid = new();
     private readonly RelayAutoTuner _autoTuner = new();
+    private readonly SmithPredictor _smith = new();
     private readonly DispatcherTimer _timer;
 
     private const double SimStepSec = 0.01;            // 10ms シミュレーション刻み
@@ -57,6 +58,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private double _kd = 0.8;
 
+    // --- スミス予測器 ---
+    [ObservableProperty]
+    private bool _isSmithEnabled = true;
+
     // --- オートチューン ---
     [ObservableProperty]
     private bool _isAutoTuning;
@@ -77,6 +82,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private double _controlTimer;             // 制御周期カウンタ
     private double _pressDurationRemaining;   // 残りボタン押下時間
     private bool _pressDirectionUp;           // true=UP, false=DOWN
+    private double _lastPidOutput;            // 前回のPID出力（スミス予測器用）
 
     // --- 手動操作用フラグ ---
     private bool _manualUpPressed;
@@ -84,6 +90,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
+        _smith.AutoConfigure();
+
         _timer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(DisplayIntervalSec)
@@ -105,6 +113,12 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnKpChanged(double value) => _pid.Kp = value;
     partial void OnKiChanged(double value) => _pid.Ki = value;
     partial void OnKdChanged(double value) => _pid.Kd = value;
+
+    partial void OnIsSmithEnabledChanged(bool value)
+    {
+        _smith.Reset();
+        _pid.Reset();
+    }
 
     // 手動ボタン操作
     [RelayCommand]
@@ -174,7 +188,16 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _controlTimer = 0;
 
-            double output = _pid.Compute(TargetRpm, _engine.SensedRpm, ControlCycleSec);
+            // スミス予測器で補正したプロセス値を使用
+            double processValue = _engine.SensedRpm;
+            if (IsSmithEnabled)
+            {
+                processValue = _smith.ComputeCorrectedPV(
+                    _engine.SensedRpm, _lastPidOutput, ControlCycleSec);
+            }
+
+            double output = _pid.Compute(TargetRpm, processValue, ControlCycleSec);
+            _lastPidOutput = output;
 
             if (Math.Abs(output) > DeadBand)
             {
