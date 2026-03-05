@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PIDControlDemo",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/PIDControlDemo/bin/Debug/net8.0/PIDControlDemo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/PIDControlDemo",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
