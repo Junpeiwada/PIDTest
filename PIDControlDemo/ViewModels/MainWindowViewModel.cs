@@ -12,6 +12,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ThrottleActuator _throttle = new();
     private readonly EngineSimulator _engine = new();
     private readonly PidController _pid = new();
+    private readonly RelayAutoTuner _autoTuner = new();
     private readonly DispatcherTimer _timer;
 
     private const double SimStepSec = 0.01;            // 10ms シミュレーション刻み
@@ -55,6 +56,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private double _kd = 0.8;
+
+    // --- オートチューン ---
+    [ObservableProperty]
+    private bool _isAutoTuning;
+
+    [ObservableProperty]
+    private string _autoTuneStatus = "";
+
+    [ObservableProperty]
+    private double _autoTuneProgress;
 
     // --- グラフデータ ---
     public List<GraphPoint> GraphPoints { get; } = new();
@@ -105,15 +116,61 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ManualDownRelease() => _manualDownPressed = false;
 
+    // オートチューン
+    [RelayCommand]
+    private void StartAutoTune()
+    {
+        if (IsAutoTuning)
+        {
+            _autoTuner.Cancel();
+            IsAutoTuning = false;
+            AutoTuneStatus = "";
+            AutoTuneProgress = 0;
+            IsPidEnabled = true;
+            return;
+        }
+
+        if (TargetRpm < 300)
+        {
+            AutoTuneStatus = "目標回転数を300rpm以上に設定してください";
+            return;
+        }
+
+        IsPidEnabled = false;
+        IsAutoTuning = true;
+        _pid.Reset();
+        _pressDurationRemaining = 0;
+        _autoTuner.Start(TargetRpm);
+    }
+
     private void OnTimerTick(object? sender, EventArgs e)
     {
         _pid.Kp = Kp;
         _pid.Ki = Ki;
         _pid.Kd = Kd;
 
+        // オートチューン中の処理
+        if (IsAutoTuning)
+        {
+            _autoTuner.Update(DisplayIntervalSec, _engine.SensedRpm);
+            AutoTuneStatus = _autoTuner.StatusMessage;
+            AutoTuneProgress = _autoTuner.Progress;
+
+            if (_autoTuner.State == RelayAutoTuner.TunerState.Done)
+            {
+                // 計測結果をPIDゲインに反映
+                Kp = _autoTuner.ResultKp;
+                Ki = _autoTuner.ResultKi;
+                Kd = _autoTuner.ResultKd;
+                _pid.Reset();
+                IsAutoTuning = false;
+                IsPidEnabled = true;
+            }
+        }
+
         // PID制御判定（制御周期ごと）
         _controlTimer += DisplayIntervalSec;
-        if (_controlTimer >= ControlCycleSec && IsPidEnabled)
+        if (_controlTimer >= ControlCycleSec && IsPidEnabled && !IsAutoTuning)
         {
             _controlTimer = 0;
 
@@ -142,8 +199,12 @@ public partial class MainWindowViewModel : ViewModelBase
             bool pidUp = _pressDurationRemaining > 0 && _pressDirectionUp;
             bool pidDown = _pressDurationRemaining > 0 && !_pressDirectionUp;
 
-            bool upPressed = _manualUpPressed || pidUp;
-            bool downPressed = _manualDownPressed || pidDown;
+            // オートチューンの出力もOR合成
+            bool tunerUp = IsAutoTuning && _autoTuner.OutputUp;
+            bool tunerDown = IsAutoTuning && _autoTuner.OutputDown;
+
+            bool upPressed = _manualUpPressed || pidUp || tunerUp;
+            bool downPressed = _manualDownPressed || pidDown || tunerDown;
 
             if (_pressDurationRemaining > 0)
                 _pressDurationRemaining -= SimStepSec;
@@ -158,8 +219,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             bool pidUp = _pressDurationRemaining > 0 && _pressDirectionUp;
             bool pidDown = _pressDurationRemaining > 0 && !_pressDirectionUp;
-            IsUpPressed = _manualUpPressed || pidUp;
-            IsDownPressed = _manualDownPressed || pidDown;
+            bool tunerUp = IsAutoTuning && _autoTuner.OutputUp;
+            bool tunerDown = IsAutoTuning && _autoTuner.OutputDown;
+            IsUpPressed = _manualUpPressed || pidUp || tunerUp;
+            IsDownPressed = _manualDownPressed || pidDown || tunerDown;
         }
 
         SensedRpm = _engine.SensedRpm;
